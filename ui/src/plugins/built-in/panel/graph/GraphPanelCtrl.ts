@@ -2,7 +2,7 @@ import _ from 'lodash'
 import {
     PanelProps, PanelData, DataFrame, TimeRange, PanelEvents,getValueFormat,formattedValueToString,dateTimeFormat,
     getFlotPairsConstant,getColorFromHexRgbOrName,getTimeField,AnnotationEvent,currentTheme
-} from 'src/packages/datav-core';
+} from 'src/packages/datav-core/src';
 import { DashboardModel } from 'src/views/dashboard/model/DashboardModel'
 import { PanelModel } from 'src/views/dashboard/model/PanelModel'
 import { DataProcessor } from './data_processor'
@@ -668,8 +668,6 @@ export class GraphPanelCtrl {
     /** This is one added to handle the scenario where we have null values in
      *  the time series data and the: "visualization options -> null value"
      *  set to "connected". In this scenario we will get the wrong dataIndex.
-     *
-     *  https://github.com/grafana/grafana/issues/22651
      */
     const { datapoint, dataIndex } = item;
 

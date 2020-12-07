@@ -43,7 +43,6 @@ function HeaderWrapper(props: Props) {
     const [dashboard, setDashboard] = useState(null)
     const [showGlobalVar, setShowGlobalVar] = useState(false)
     appEvents.on('open-dashboard-save-modal', (dash) => {
-        console.log(dash[0].auto)
         setDashboard(dash)
     })
 
@@ -62,11 +61,6 @@ function HeaderWrapper(props: Props) {
         SetInSave(false)
     });
     
-    // const globalVars = []
-    // const localVars = []
-    // props.variables.forEach(v => {
-    //     v.global ?  globalVars.push(v) : localVars.push(v) 
-    // })
 
     const onSaveDashboard = () => {
         appEvents.emit('dashboard-auto-save',dashboard[0].autoSave)
@@ -110,7 +104,8 @@ function HeaderWrapper(props: Props) {
     }
 
     return (
-        <Header className="datav-header">
+        <>
+        {props.dashboard.showHeader && <Header className="datav-header">
             <div className='datav-header-inner'>
                 <div>
                     <div className="ub-mr1">{backButtonComponent}</div>
@@ -136,8 +131,8 @@ function HeaderWrapper(props: Props) {
                     <TimePickerWrapper />
                 </div>
             </div>
-
-            {dashboard && <SaveDashboard dashboard={dashboard[0]} originDashbord={dashboard[1]} onSave={onSaveDashboard} onCancel={onCancelSaveDash}/>}
+        </Header>}
+        {dashboard && <SaveDashboard dashboard={dashboard[0]} originDashbord={dashboard[1]} onSave={onSaveDashboard} onCancel={onCancelSaveDash}/>}
             
             {/* <Modal
                 title={null}
@@ -160,7 +155,7 @@ function HeaderWrapper(props: Props) {
                         : localeData[props.locale]['dashboard.changeNotSave']
             }
             />
-        </Header>
+        </>
     )
 }
 

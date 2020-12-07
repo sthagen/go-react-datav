@@ -7,7 +7,7 @@ import { DashboardModel } from './model/DashboardModel'
 import { Button, Result } from 'antd'
 import { DashboardGrid } from './DashGrid'
 import { getTimeSrv } from 'src/core/services/time'
-import { TimeRange, CustomScrollbar, config, getBackendSrv } from 'src/packages/datav-core'
+import { TimeRange, CustomScrollbar, config, getBackendSrv } from 'src/packages/datav-core/src'
 
 import './DashboardPage.less'
 import { initDashboard } from './model/initDashboard';
@@ -33,6 +33,7 @@ import HeaderWrapper from './components/Header/Header'
 import { updateUrl } from 'src/core/library/utils/url';
 import { getVariables } from 'src/views/variables/state/selectors'
 import { saveDashboard } from './components/SaveDashboard/SaveDashboard';
+import { formatDocumentTitle } from 'src/core/library/utils/date';
 
 
 interface DashboardPageProps {
@@ -123,7 +124,7 @@ class DashboardPage extends React.PureComponent<DashboardPageProps & RouteCompon
     setOriginDash() {
         this.originDash = _.cloneDeep(this.props.dashboard.getSaveModelClone());
     }
-    init(ds) {
+    init(ds:DashboardModel) {
         this.originDash = _.cloneDeep(ds)
 
         store.dispatch(updateBreadcrumbText(ds.title))
@@ -150,6 +151,8 @@ class DashboardPage extends React.PureComponent<DashboardPageProps & RouteCompon
             // init auto save option
             this.handleAutoSave(ds.autoSave)
         }
+ 
+        document.title = formatDocumentTitle(ds.title)
     }
 
     componentWillUnmount() {
@@ -371,7 +374,7 @@ class DashboardPage extends React.PureComponent<DashboardPageProps & RouteCompon
         return (
             <div>
                 <HeaderWrapper viewState={viewState} dashboard={dashboard} onAddPanel={this.onAddPanel} onSaveDashboard={this.saveDashboard} onUpdateUrl={this.onUpdateUrl} />
-                <div className="scroll-canvas scroll-canvas--dashboard">
+                <div className="scroll-canvas scroll-canvas--dashboard" style={{height: dashboard.showHeader === true ?  'calc(100% - 48px)' : '100%'}}>
                     <CustomScrollbar
                         autoHeightMin="100%"
                         setScrollTop={this.setScrollTop}
@@ -380,7 +383,7 @@ class DashboardPage extends React.PureComponent<DashboardPageProps & RouteCompon
                         className="custom-scrollbar--page"
                     >
                         <div className={gridWrapperClasses}>
-                            {!editPanel && config.featureToggles.newVariables && variables.length > 0 &&  <SubMenu dashboard={dashboard} />}
+                            {dashboard.showHeader && !editPanel && config.featureToggles.newVariables && variables.length > 0 &&  <SubMenu dashboard={dashboard} />}
                             <DashboardGrid
                                 alertStates={panelAlertStates}
                                 dashboard={dashboard}
@@ -423,7 +426,7 @@ function cleanDashboardFromIgnoredChanges(dashData: any) {
 
 
         // ignore panel legend sort
-        if (panel.options.legend) {
+        if (panel.options?.legend) {
             delete panel.options.legend.sort;
             delete panel.options.legend.sortDesc;
         }

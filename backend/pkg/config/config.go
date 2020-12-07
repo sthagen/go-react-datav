@@ -12,24 +12,20 @@ import (
 // Config ...
 type Config struct {
 	Common struct {
-		Version        string
-		StaticRootPath string `yaml:"static_root_path"`
-		HomePath       string `yaml:"home_path"`
-		UIRootURL      string `yaml:"ui_root_url"`
+		Version         string
+		LogLevel        string `yaml:"log_level"`
+		AppName         string `yaml:"app_name"`
+		EnableCommunity bool   `yaml:"enable_community_entry"`
 	}
 
-	Log struct {
-		Level string
-	}
-
-	Storage struct {
-		Keyspace string
-		Cluster  []string
-		NumConns int
-	}
-
-	Web struct {
-		Addr string
+	Server struct {
+		BackendPort     string `yaml:"backend_port"`
+		UIPort          string `yaml:"ui_port"`
+		UIRootURL       string `yaml:"ui_root_url"`
+		DocsPort        string `yaml:"docs_port"`
+		DocsAddr        string `yaml:"docs_addr"`
+		StaticRootPath  string `yaml:"static_root_path"`
+		RootUrlRedirect string `yaml:"root_url_redirect"`
 	}
 
 	SMTP struct {
@@ -59,6 +55,11 @@ type Config struct {
 
 	Dataproxy struct {
 		Timeout int
+	}
+
+	Paths struct {
+		Data string
+		Logs string
 	}
 }
 

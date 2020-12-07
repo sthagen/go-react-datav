@@ -622,3 +622,31 @@ func GetUserAcl(c *gin.Context) {
 
 	c.JSON(200, common.ResponseSuccess(userAcls))
 }
+
+func DelDashboard(c *gin.Context) {
+	dashId, _ := strconv.ParseInt(c.Param("id"), 10, 64)
+	if dashId == 0 {
+		c.JSON(400, common.ResponseI18nError(i18n.BadRequestData))
+		return
+	}
+
+	if dashId == models.GlobalDashboardId {
+		c.JSON(400, common.ResponseI18nError("error.cantDeleteReserverDash"))
+		return
+	}
+
+	// get current ownedby
+	meta, err := QueryDashboardMeta(dashId)
+	if err != nil {
+		logger.Warn("query team error", "error", err)
+		c.JSON(500, common.ResponseInternalError())
+		return
+	}
+
+	if !acl.CanAdminDashboard(dashId, meta.OwnedBy, c) {
+		c.JSON(403, common.ResponseI18nError(i18n.NoPermission))
+		return
+	}
+
+	DeleteDashboard(dashId)
+}

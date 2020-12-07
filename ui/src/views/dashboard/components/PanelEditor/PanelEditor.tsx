@@ -1,6 +1,6 @@
 import React, { PureComponent } from 'react';
 import _ from 'lodash'
-import { FieldConfigSource, PanelPlugin } from 'src/packages/datav-core';
+import { FieldConfigSource, PanelPlugin } from 'src/packages/datav-core/src';
 import { Row, Button, message} from 'antd'
 import { cx } from 'emotion';
 import AutoSizer from 'react-virtualized-auto-sizer';
@@ -42,7 +42,7 @@ import { cleanUpEditPanel } from 'src/store/reducers/dashboard';
 import { getUrlParams } from 'src/core/library/utils/url';
 import { FormattedMessage } from 'react-intl';
 
-export const PANEL_EDITOR_UI_STATE_STORAGE_KEY = 'grafana.dashboard.editor.ui';
+export const PANEL_EDITOR_UI_STATE_STORAGE_KEY = 'datav.dashboard.editor.ui';
 
 export const DEFAULT_PANEL_EDITOR_UI_STATE: PanelEditorUIState = {
     isPanelOptionsVisible: true,

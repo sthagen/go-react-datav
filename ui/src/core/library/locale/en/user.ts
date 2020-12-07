@@ -14,6 +14,9 @@ const user = {
     newPassword: 'New password',
     confirmPassword: 'Confirm password',
     loginTitle: 'Welcome login',
+    superAdminTips: "'admin' is the default super admin, this user cannot be changed",
+    currentUser: 'Current user',
+    subTitle: 'Settings for user',
 }
 
 export default user

@@ -8,7 +8,7 @@ import { useLocation } from 'react-router-dom'
 import classNames from 'classnames'
 
 import { User } from 'src/core/services/context';
-import { Icon, IconName, ThemeType, setCurrentTheme } from 'src/packages/datav-core';
+import { Icon, IconName, ThemeType, setCurrentTheme } from 'src/packages/datav-core/src';
 
 import { getFooterLinks } from '../Footer/Footer';
 // import appEvents from 'src/core/library/utils/app_events';
@@ -124,6 +124,7 @@ export const BottomNavLinks = (props:Props) => {
             <li key="change-lang">
               <a onClick={() => {
                 store.dispatch(updateLocale())
+                window.location.reload()
               }}>
                 {props.locale === Langs.Chinese ? '当前语言-中文' : 'Current Lang - Enlgish'}
               </a>
@@ -214,6 +215,7 @@ export const BottomNavLinks = (props:Props) => {
               <Shortcut value={['e']} desc={<Message id="keybinding.e"/>}></Shortcut>
               <Shortcut value={['v']} desc={<Message id="keybinding.v"/>}></Shortcut>
               <Shortcut value={['i']} desc={<Message id="keybinding.i"/>}></Shortcut>
+              <Shortcut value={['d s']} desc={<Message id="keybinding.s"/>}></Shortcut>
             </Col>
           </Row>
         </Modal>
@@ -226,7 +228,7 @@ const Shortcut = (props) => {
   return (
     <div className="shortcut">
       {
-        props.value.map((k) => <span className="shortcut-table-key">{k}</span>)
+        props.value.map((k) => <span className="shortcut-table-key" key={k}>{k}</span>)
       }
       <span className="shortcut-table-description">{props.desc}</span>
     </div>

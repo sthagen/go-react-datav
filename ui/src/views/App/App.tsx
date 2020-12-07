@@ -32,7 +32,7 @@ import darkVars from 'src/styles/dark.json';
 import lightVars from 'src/styles/light.json';
 import { StoreState } from 'src/types'
 
-import { LocationUpdate, setDataSourceService, setBackendSrv, ThemeType, setCurrentTheme, setMarkdownOptions, getBackendSrv, setBootConfig, ThemeContext, getTheme, setLocationSrv,standardFieldConfigEditorRegistry, getStandardFieldConfigs,standardTransformersRegistry, currentLang} from 'src/packages/datav-core'
+import { LocationUpdate, setDataSourceService, setBackendSrv, ThemeType, setCurrentTheme, setMarkdownOptions, getBackendSrv, setBootConfig, ThemeContext, getTheme, setLocationSrv,standardFieldConfigEditorRegistry, getStandardFieldConfigs,standardTransformersRegistry, currentLang} from 'src/packages/datav-core/src'
 import { DatasourceSrv } from 'src/core/services/datasource'
 import { backendSrv } from 'src/core/services/backend'
 
@@ -49,6 +49,7 @@ import { setLinkSrv, LinkSrv } from 'src/core/services/link';
 import { getStandardTransformers } from 'src/core/library/utils/standardTransformers';
 import { getUrlParams } from 'src/core/library/utils/url'
 import localeData from 'src/core/library/locale';
+import PreloadError from './PreloadError'
 
 interface Props {
   theme: string 
@@ -177,7 +178,7 @@ const UIApp = (props: Props) => {
         </Intl>
       </ThemeContext.Provider>
       :
-      <></>
+     <PreloadError />
   return render
 }
 

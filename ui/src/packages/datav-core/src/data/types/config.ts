@@ -5,6 +5,14 @@ export interface DatavConfig {
   user : UserConfig
 }
 
+export interface CommonConfig {
+  appName: string 
+  version: string
+  enableCommunity: boolean
+  rootUrlRedirect: string
+  docsAddr: string
+}
+
 export interface PanelConfig {
   newTitle: string
 }

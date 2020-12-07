@@ -6,7 +6,7 @@ import _ from 'lodash';
 
 // Types
 import { PanelModel,DashboardModel} from '../../../../model';
-import { DataQuery, PanelData, DataSourceSelectItem } from 'src/packages/datav-core';
+import { DataQuery, PanelData, DataSourceSelectItem } from 'src/packages/datav-core/src';
 import { QueryEditorRow } from  './QueryEditorRow'
 import { addQuery } from 'src/core/library/utils/query';
 
@@ -82,7 +82,7 @@ export class QueryEditorRows extends PureComponent<Props> {
     const { props } = this;
     return props.queries.map((query, index) => (
       <QueryEditorRow
-        dataSourceValue={query.datasource || props.datasource.value}
+        dataSourceValue={query.datasource || props.datasource?.value}
         key={query.refId}
         panel={props.panel}
         dashboard={props.dashboard}
@@ -92,7 +92,7 @@ export class QueryEditorRows extends PureComponent<Props> {
         onRemoveQuery={this.onRemoveQuery}
         onAddQuery={this.onAddQuery}
         onMoveQuery={this.onMoveQuery}
-        inMixedMode={props.datasource.meta.mixed}
+        inMixedMode={props.datasource?.meta.mixed}
       />
     ));
   }

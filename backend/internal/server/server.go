@@ -2,18 +2,17 @@ package server
 
 import (
 	"context"
-	"errors"
+	"os"
+	"path/filepath"
+	"time"
 
 	"github.com/apm-ai/datav/backend/internal/acl"
 	"github.com/apm-ai/datav/backend/internal/annotation"
 	"github.com/apm-ai/datav/backend/internal/bootConfig"
 	"github.com/apm-ai/datav/backend/internal/datasources"
 	"github.com/apm-ai/datav/backend/internal/users"
-	"github.com/apm-ai/datav/backend/pkg/utils"
 
 	// "net/http"
-
-	"database/sql"
 
 	"net/http"
 
@@ -30,10 +29,10 @@ import (
 	"github.com/apm-ai/datav/backend/internal/teams"
 	"github.com/apm-ai/datav/backend/pkg/common"
 	"github.com/apm-ai/datav/backend/pkg/config"
-	"github.com/apm-ai/datav/backend/pkg/db"
 	"github.com/apm-ai/datav/backend/pkg/i18n"
 	"github.com/apm-ai/datav/backend/pkg/log"
 	"github.com/gin-gonic/gin"
+	"github.com/gorilla/mux"
 	_ "github.com/mattn/go-sqlite3"
 	"golang.org/x/sync/errgroup"
 )
@@ -90,9 +89,9 @@ func (s *Server) Start() error {
 
 	}
 
-	err := s.initDB()
+	err := initDatabase()
 	if err != nil {
-		logger.Error("open sqlite error", "error", err.Error())
+		logger.Error("init database error", "error", err.Error())
 		return err
 	}
 
@@ -102,8 +101,8 @@ func (s *Server) Start() error {
 	// init search cache
 	cache.InitCache()
 
+	gin.SetMode(gin.ReleaseMode)
 	go func() {
-		gin.SetMode(gin.ReleaseMode)
 		r := gin.New()
 		r.Use(Cors())
 
@@ -139,6 +138,7 @@ func (s *Server) Start() error {
 			dashboardR := authR.Group("/api/dashboard")
 			{
 				dashboardR.POST("/save", dashboard.SaveDashboard)
+				dashboardR.DELETE("/id/:id", dashboard.DelDashboard)
 				dashboardR.GET("/uid/:uid", dashboard.GetDashboard)
 				dashboardR.POST("/import", dashboard.ImportDashboard)
 				dashboardR.GET("/tags", dashboard.GetAllTags)
@@ -220,7 +220,7 @@ func (s *Server) Start() error {
 				adminR.POST("/team/new", admin.NewTeam)
 			}
 
-			alertingR := authR.Group("/api/alerting", AdminAuth())
+			alertingR := authR.Group("/api/alerting")
 			{
 				alertingR.POST("/notification/:teamId", alerting.AddNotification)
 				alertingR.PUT("/notification/:teamId", alerting.UpdateNotification)
@@ -235,28 +235,55 @@ func (s *Server) Start() error {
 			}
 		}
 
-		r.Run(config.Data.Web.Addr)
+		err := r.Run(config.Data.Server.BackendPort)
+		if err != nil {
+			logger.Crit("start backend server error", "error", err)
+			panic(err)
+		}
 	}()
+
+	go func() {
+		router := mux.NewRouter()
+
+		spa := spaHandler{staticPath: "ui/build/", indexPath: "index.html"}
+		router.PathPrefix("/").Handler(spa)
+
+		srv := &http.Server{
+			Handler: router,
+			Addr:    config.Data.Server.UIPort,
+			// Good practice: enforce timeouts for servers you create!
+			WriteTimeout: 15 * time.Second,
+			ReadTimeout:  15 * time.Second,
+		}
+
+		srv.ListenAndServe()
+	}()
+
+	if config.Data.Server.DocsPort != "" {
+		go func() {
+			router := mux.NewRouter()
+
+			spa := spaHandler{staticPath: "docs/", indexPath: "index.html"}
+			router.PathPrefix("/").Handler(spa)
+
+			srv := &http.Server{
+				Handler: router,
+				Addr:    config.Data.Server.DocsPort,
+				// Good practice: enforce timeouts for servers you create!
+				WriteTimeout: 15 * time.Second,
+				ReadTimeout:  15 * time.Second,
+			}
+
+			srv.ListenAndServe()
+		}()
+
+	}
 
 	return nil
 }
 
 // Close ...
 func (s *Server) Close() error {
-	return nil
-}
-
-func (s *Server) initDB() error {
-	exist, _ := utils.FileExists("./datav.db")
-	if !exist {
-		return errors.New("db file not exist, please run init commant")
-	}
-	d, err := sql.Open("sqlite3", "./datav.db")
-	if err != nil {
-		return err
-	}
-
-	db.SQL = d
 	return nil
 }
 
@@ -302,4 +329,47 @@ func AdminAuth() gin.HandlerFunc {
 		}
 		c.Next()
 	}
+}
+
+// spaHandler implements the http.Handler interface, so we can use it
+// to respond to HTTP requests. The path to the static directory and
+// path to the index file within that static directory are used to
+// serve the SPA in the given static directory.
+type spaHandler struct {
+	staticPath string
+	indexPath  string
+}
+
+// ServeHTTP inspects the URL path to locate a file within the static dir
+// on the SPA handler. If a file is found, it will be served. If not, the
+// file located at the index path on the SPA handler will be served. This
+// is suitable behavior for serving an SPA (single page application).
+func (h spaHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	// get the absolute path to prevent directory traversal
+	path, err := filepath.Abs(r.URL.Path)
+	if err != nil {
+		// if we failed to get the absolute path respond with a 400 bad request
+		// and stop
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	// prepend the path with the path to the static directory
+	path = filepath.Join(h.staticPath, path)
+
+	// check whether a file exists at the given path
+	_, err = os.Stat(path)
+	if os.IsNotExist(err) {
+		// file does not exist, serve index.html
+		http.ServeFile(w, r, filepath.Join(h.staticPath, h.indexPath))
+		return
+	} else if err != nil {
+		// if we got an error (that wasn't that the file doesn't exist) stating the
+		// file, return a 500 internal server error and stop
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// otherwise, use http.FileServer to serve the static dir
+	http.FileServer(http.Dir(h.staticPath)).ServeHTTP(w, r)
 }

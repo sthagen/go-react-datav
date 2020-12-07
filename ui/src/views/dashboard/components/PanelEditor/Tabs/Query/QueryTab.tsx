@@ -3,8 +3,8 @@ import React, { PureComponent } from 'react';
 // Components
 import { DataSourcePicker } from 'src/views/components/Pickers/DataSourcePicker';
 import { QueryOptions } from './QueryOptions'
-import { CustomScrollbar, FormField as Field } from 'src/packages/datav-core';
-import {Row,Button} from 'antd'
+import { CustomScrollbar, FormField as Field } from 'src/packages/datav-core/src';
+import {Row,Button,notification} from 'antd'
 import { QueryEditorRows } from './QueryEditorRows';
 // Services
 import { getDatasourceSrv } from 'src/core/services/datasource';
@@ -19,7 +19,7 @@ import {
   PanelData,
   DataSourceApi,
   config
-} from 'src/packages/datav-core';
+} from 'src/packages/datav-core/src';
 import { addQuery } from 'src/core/library/utils/query';
 import { Unsubscribable } from 'rxjs';
 import { PlusOutlined } from '@ant-design/icons';
@@ -77,6 +77,11 @@ export class QueriesTab extends PureComponent<Props, State> {
       const ds = await getDatasourceSrv().get(panel.datasource);
       this.setState({ dataSource: ds });
     } catch (error) {
+      notification['error']({
+        message: "Error",
+        description: error.message,
+        duration: 5
+      });
       const ds = await getDatasourceSrv().get();
       const dataSourceItem = this.findCurrentDataSource(ds.name);
       this.setState({ dataSource: ds, dataSourceError: error?.message, dataSourceItem });
@@ -111,7 +116,6 @@ export class QueriesTab extends PureComponent<Props, State> {
     }
 
     const dataSource = await getDatasourceSrv().get(newDsItem.value);
-
     panel.datasource = newDsItem.value;
 
     this.setState(
@@ -235,7 +239,7 @@ export class QueriesTab extends PureComponent<Props, State> {
   renderQueries() {
     const { panel, dashboard } = this.props;
     const { dataSourceItem, data } = this.state;
-
+    
     return (
       <div>
         <QueryEditorRows

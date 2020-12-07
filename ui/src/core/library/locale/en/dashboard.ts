@@ -35,6 +35,7 @@ const dashboard = {
     onTimeChange: 'On Time Range Change',
     variableRegexTooltip: 'Optional, if you want to extract part of a series name or metric node segment',
     variableSortTooltip: 'How to sort the values of this variable',
+    variableCustomValues: 'Values separated by comma',
     teamPermissions: 'Team Permissions',
     userPermissions: 'User Permissions',
     ownedByTeam: 'Owned By Team',
@@ -54,9 +55,14 @@ const dashboard = {
     dashVariables: 'Dashboard variables',
     autoSave: 'Auto save',
     autoSaveTips: 'Dashboard will be saved every 10 seconds',
+    showHeader: 'Show header',
 
     viewMode: 'Cycle view mode',
     fullscreenTips: 'Press ESC to exit Fullscreen mode',
+
+    delDashboard: 'Delete dashboard',
+    delDashboardTips: 'This operation cant be reverted, do it carefully',
+    delDashboardConfirm: 'Delete operation cant be reverted, are you sure you want to delete this dashboard?',
 }
 
 export default dashboard

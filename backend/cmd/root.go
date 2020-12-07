@@ -34,8 +34,8 @@ var rootCmd = &cobra.Command{
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	Run: func(cmd *cobra.Command, args []string) {
-		config.Init("web.conf")
-		err := log.InitLogger(config.Data.Log.Level)
+		config.Init("datav.conf")
+		err := log.InitLogger(config.Data.Common.LogLevel)
 		if err != nil {
 			fmt.Println("init logger error", err)
 			return

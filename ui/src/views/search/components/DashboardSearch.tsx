@@ -1,6 +1,6 @@
 import React, { FC, memo } from 'react';
 import { css } from 'emotion';
-import { useTheme, CustomScrollbar, stylesFactory, IconButton,DatavTheme} from 'src/packages/datav-core';
+import { useTheme, CustomScrollbar, stylesFactory, IconButton,DatavTheme} from 'src/packages/datav-core/src';
 import { useSearchQuery } from '../hooks/useSearchQuery';
 import { useDashboardSearch } from '../hooks/useDashboardSearch';
 import { SearchField } from './SearchField';
@@ -67,7 +67,7 @@ const getStyles = stylesFactory((theme: DatavTheme) => {
 
       @media only screen and (min-width: ${theme.breakpoints.md}) {
         left: 60px;
-        z-index: ${theme.zIndex.navbarFixed + 1};
+        z-index: 2000;
       }
     `,
     container: css`

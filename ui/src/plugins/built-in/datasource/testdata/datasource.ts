@@ -12,9 +12,9 @@ import {
   base64StringToArrowTable,
   arrowTableToDataFrame,
   DataFrame,
-} from 'src/packages/datav-core';
+} from 'src/packages/datav-core/src';
 import { Scenario, TestDataQuery } from './types';
-import { getBackendSrv, toDataQueryError } from 'src/packages/datav-core';
+import { getBackendSrv, toDataQueryError } from 'src/packages/datav-core/src';
 import { queryMetricTree } from './metricTree';
 import { from, merge, Observable, of } from 'rxjs';
 import { runStream } from './runStreams';
@@ -114,7 +114,7 @@ export class TestDataDataSource extends DataSourceApi<TestDataQuery> {
       events.push({
         annotation: options.annotation,
         time: timeWalker,
-        text: 'This is the text, <a href="https://grafana.com">Grafana.com</a>',
+        text: 'This is the text, <a href="https://datav.dev">datav.dev</a>',
         tags: ['text', 'server'],
       });
       timeWalker += step;

@@ -53,13 +53,12 @@ const BreadcrumbWrapper = (props:Props) =>{
         `;
     
         const folderTitle = dashboard.meta.folderTitle;
-        const haveFolder = dashboard.meta.folderId >= 0;
-
+        const haveFolder = dashboard.id &&  dashboard.meta.folderId > 0;
         return (
           <>
             <div>
               <div className="navbar-page-btn">
-                {!isFullscreen && <Icon name={icon} size="lg" className={mainIconClassName} />}
+                {/* {!isFullscreen && <Icon name={icon} size="lg" className={mainIconClassName} />} */}
                 {haveFolder && (
                   <>
                     <a className="navbar-page-btn__folder hover-primary" onClick={onFolderNameClick}>

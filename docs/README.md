@@ -1,20 +1,26 @@
-# Datav Documentation
+#  datav.dev docs
 
-Datav docs uses [Next.js](https://nextjs.org/) for its documentation. Here is how you can run the project locally:
+datav.dev uses [Next.js](https://nextjs.org/) for its documentation. Here is how you can run the project locally: 
 
-1. Go to your Tailwind folder
+1. Clone this repo
 
     ```sh
-    cd docs
+    git clone https://github.com/opendatav/datav.dev.git
     ```
 
-2. Install JS dependencies
+2. Go into the project root directory
+
+    ```sh
+    cd datav.dev
+    ```
+
+3. Install JS dependencies
 
     ```sh
     yarn
     ```
 
-3. Start the dev server
+4. Start the dev server
 
     ```sh
     yarn dev

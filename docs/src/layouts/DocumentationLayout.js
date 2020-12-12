@@ -1,19 +1,15 @@
 import { SidebarLayout } from '@/layouts/SidebarLayout'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
-import twitterSquare from '@/img/twitter-square.png'
+import twitterSquare from '@/img/twitter-square.jpg'
 import { Title } from '@/components/Title'
 import { createPageList } from '@/utils/createPageList'
-
-
-
-
 
 
 export function DocumentationLayout(props) {
   const router = useRouter()
   let lang = 'en_US'
-  if (router.pathname.indexOf('/docs-cn/') !== -1) {
+  if (router.pathname.indexOf('/docs-cn') !== -1) {
     lang = 'zh_CN'
   }
 
@@ -51,9 +47,15 @@ export function DocumentationLayout(props) {
         pages['create-sidemenu'],
         pages['advance-permissions'],
         pages['alerts'],
+        pages['panel-interactive'],
+        pages['advance-dashboard'],
       ],
       '插件指南': [
         pages['plugins-overview'],
+        pages['echarts-plugin'],
+        pages['graph-plugin'],
+        pages['dependency-graph-plugin'],
+        pages['jaeger-plugin'],
       ]
     }
   } else {
@@ -76,16 +78,23 @@ export function DocumentationLayout(props) {
         pages['create-sidemenu'],
         pages['advance-permissions'],
         pages['alerts'],
+        pages['panel-interactive'],
+        pages['advance-dashboard'],
       ],
       'Plugins': [
         pages['plugins-overview'],
+        pages['echarts-plugin'],
+        pages['graph-plugin'],
+        pages['dependency-graph-plugin'],
+        pages['jaeger-plugin']
       ]
     }
   }
 
+
   return (
     <>
-      <Title suffix={router.pathname === '/' ? undefined : 'Docs'}>
+      <Title suffix={router.pathname === '/' ? undefined : 'Datav'}>
         {props.layoutProps.meta.metaTitle || props.layoutProps.meta.title}
       </Title>
       <Head>

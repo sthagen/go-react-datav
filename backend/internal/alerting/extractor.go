@@ -8,8 +8,8 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/apm-ai/datav/backend/pkg/models"
-	"github.com/apm-ai/datav/backend/pkg/utils/simplejson"
+	"github.com/opendatav/datav/backend/pkg/models"
+	"github.com/opendatav/datav/backend/pkg/utils/simplejson"
 )
 
 // DashAlertExtractor extracts alerts from the dashboard json.
@@ -107,7 +107,7 @@ func (e *DashAlertExtractor) getAlertFromPanels(jsonWithPanels *simplejson.Json,
 			panelQuery := findPanelQueryByRefID(panel, queryRefID)
 
 			if panelQuery == nil {
-				reason := fmt.Sprintf("Alert on PanelId: %v refers to query(%s) that cannot be found", alert.PanelId, queryRefID)
+				reason := fmt.Sprintf("The query(%s) of the alert condition is not exist, please add a query for that panel first, or remove the alerts", queryRefID)
 				return nil, errors.New(reason)
 			}
 

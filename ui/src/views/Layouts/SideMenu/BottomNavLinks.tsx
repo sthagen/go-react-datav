@@ -8,7 +8,7 @@ import { useLocation } from 'react-router-dom'
 import classNames from 'classnames'
 
 import { User } from 'src/core/services/context';
-import { Icon, IconName, ThemeType, setCurrentTheme } from 'src/packages/datav-core/src';
+import { Icon, IconName, ThemeType, setCurrentTheme, getBootConfig } from 'src/packages/datav-core/src';
 
 import { getFooterLinks } from '../Footer/Footer';
 // import appEvents from 'src/core/library/utils/app_events';
@@ -93,7 +93,6 @@ export const BottomNavLinks = (props:Props) => {
       'dropup': true
     })
 
-
     return (
       <>
       <div className={classes}>
@@ -121,7 +120,7 @@ export const BottomNavLinks = (props:Props) => {
             </li>
           )}
 
-          {link.id === 'datav-fix-menu-user' && (
+          {link.id === 'datav-fix-menu-user' && getBootConfig().common.enableMultiLang &&(
             <li key="change-lang">
               <a onClick={() => {
                 store.dispatch(updateLocale())

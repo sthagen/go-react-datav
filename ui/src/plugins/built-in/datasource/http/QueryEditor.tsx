@@ -70,7 +70,7 @@ export const QueryEditor: ComponentType<Props> = ({ datasource, onChange, onRunQ
           <AsyncSelect
             loadOptions={loadMetrics}
             defaultOptions
-            placeholder="Select metric"
+            placeholder="Metric.."
             allowCustomValue
             value={metric}
             onChange={v => {
@@ -81,7 +81,7 @@ export const QueryEditor: ComponentType<Props> = ({ datasource, onChange, onRunQ
       </div>
       <div className="gf-form">
         <div className="gf-form">
-          <InlineFormLabel width={9}>{localeData[currentLang]['panel.adittionalJson']}</InlineFormLabel>
+          <InlineFormLabel width={7}>{localeData[currentLang]['panel.adittionalJson']}</InlineFormLabel>
         </div>
         <div className="gf-form border-base">
           <CodeEditor

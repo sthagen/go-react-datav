@@ -788,7 +788,7 @@ const graphOptionsDefaults: any = {
     // fill factor
     fill: 1,
     // fill gradient
-    fillGradient: 0,
+    fillGradient: 5,
     // line width in pixels
     linewidth: 1,
     // show/hide dashed line
@@ -809,16 +809,19 @@ const graphOptionsDefaults: any = {
     stack: false,
     // stack percentage mode
     percentage: false,
-    decimals: 3,
+    decimals: 2,
     // legend options
     legend: {
         show: true, // disable/enable legend
         values: false, // disable/enable legend values
         min: false,
         max: false,
-        current: false,
+        current: true,
         total: false,
         avg: false,
+        alignAsTable: true,
+        sort: "current",
+        sortDesc: true,
     },
     // how null points should be handled
     nullPointMode: 'null',

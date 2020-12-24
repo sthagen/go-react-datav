@@ -3,7 +3,6 @@ import debounce from 'lodash/debounce';
 import sortBy from 'lodash/sortBy';
 
 import { Editor as CoreEditor } from 'slate';
-import { Plugin as SlatePlugin } from '@grafana/slate-react';
 
 import TOKEN_MARK from './slate-prism/TOKEN_MARK';
 import { Typeahead } from '../components/Typeahead/Typeahead';
@@ -28,7 +27,7 @@ export function SuggestionsPlugin({
   cleanText?: (text: string) => string;
   onWillApplySuggestion?: (suggestion: string, state: SuggestionsState) => string;
   portalOrigin: string;
-}): SlatePlugin {
+}) {
   let typeaheadRef: Typeahead;
   let state: SuggestionsState = {
     groupedItems: [],

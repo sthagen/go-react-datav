@@ -10,7 +10,7 @@ Datav is forked from **@grafana**, but changed a lot, e.g :
 - 100% free. Forever and always
 
 ## Status
-v0.8.0 has been released, official website and docs will be released before 2020-11-25 .
+v0.8.0 has been released, official website and docs will be released before 2020-12-31.
 
 ## Key Features 
 - **Plugins** Performance,Extensible,Beautiful,Configurable
@@ -25,7 +25,7 @@ v0.8.0 has been released, official website and docs will be released before 2020
 ## How to start(developing mode)
 ### Start datav main server
 ```bash
-> git clone https://github.com/apm-ai/datav
+> git clone https://github.com/opendatav/datav
 > cd datav
 > go build
 > ./datav generate ##only needed for first time or new plugins been added

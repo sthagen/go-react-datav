@@ -47,6 +47,12 @@ export const plugin = new PanelPlugin<Options, CustomFieldConfig>(TablePanel)
               { value: TableCellDisplayMode.JSONView, label: 'JSON View' },
             ],
           },
+        })
+        .addBooleanSwitch({
+          path: 'filterable',
+          name: 'Column filter',
+          description: 'Enables/disables field filters in table',
+          defaultValue: false,
         });
     },
   })
@@ -88,7 +94,7 @@ export const plugin = new PanelPlugin<Options, CustomFieldConfig>(TablePanel)
     }
     return (
       <div>
-        <div>function(data, history, setVariable) <span className="color-primary">&nbsp;{` {`}</span></div>
+        <div>function(data, history, setVariable, setTime) <span className="color-primary">&nbsp;{` {`}</span></div>
            <CodeEditor
           width="100%"
           height="200px"

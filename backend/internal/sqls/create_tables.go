@@ -8,14 +8,14 @@ import (
 	"strings"
 	"time"
 
-	"github.com/apm-ai/datav/backend/pkg/config"
+	"github.com/opendatav/datav/backend/pkg/config"
 	"github.com/grafana/grafana/pkg/cmd/grafana-cli/logger"
 
-	"github.com/apm-ai/datav/backend/internal/teams"
-	"github.com/apm-ai/datav/backend/pkg/db"
-	"github.com/apm-ai/datav/backend/pkg/log"
-	"github.com/apm-ai/datav/backend/pkg/models"
-	"github.com/apm-ai/datav/backend/pkg/utils"
+	"github.com/opendatav/datav/backend/internal/teams"
+	"github.com/opendatav/datav/backend/pkg/db"
+	"github.com/opendatav/datav/backend/pkg/log"
+	"github.com/opendatav/datav/backend/pkg/models"
+	"github.com/opendatav/datav/backend/pkg/utils"
 )
 
 var adminSalt, adminPW string
@@ -475,7 +475,8 @@ var CreateTableSqls = map[string]string{
 	CREATE TABLE IF NOT EXISTS alert_history (
 		id 						INTEGER PRIMARY KEY AUTOINCREMENT,
 		dashboard_id            INTEGER NOT NULL,
-		panel_id                INTEGER NOT NULL,     
+		panel_id                INTEGER NOT NULL,
+		alert_name              TEXT,     
 		state					VARCHAR(255) NOT NULL,
 		matches					TEXT NOT NULL,
 		created					DATETIME NOT NULL

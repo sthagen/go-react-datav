@@ -52,7 +52,8 @@ export interface State {
 export class Panel extends PureComponent<Props, State> {
   timeSrv: TimeSrv = getTimeSrv();
   querySubscription: Unsubscribable;
-
+  unmounted: boolean
+  
   constructor(props: Props) {
     super(props);
 

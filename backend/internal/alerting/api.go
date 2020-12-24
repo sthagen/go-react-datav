@@ -10,18 +10,18 @@ import (
 	"strings"
 	"time"
 
-	"github.com/apm-ai/datav/backend/internal/cache"
+	"github.com/opendatav/datav/backend/internal/cache"
 
-	_ "github.com/apm-ai/datav/backend/pkg/tsdb"
+	_ "github.com/opendatav/datav/backend/pkg/tsdb"
 
-	"github.com/apm-ai/datav/backend/internal/acl"
-	"github.com/apm-ai/datav/backend/internal/session"
-	"github.com/apm-ai/datav/backend/pkg/common"
-	"github.com/apm-ai/datav/backend/pkg/db"
-	"github.com/apm-ai/datav/backend/pkg/i18n"
-	"github.com/apm-ai/datav/backend/pkg/models"
-	"github.com/apm-ai/datav/backend/pkg/utils/null"
-	"github.com/apm-ai/datav/backend/pkg/utils/simplejson"
+	"github.com/opendatav/datav/backend/internal/acl"
+	"github.com/opendatav/datav/backend/internal/session"
+	"github.com/opendatav/datav/backend/pkg/common"
+	"github.com/opendatav/datav/backend/pkg/db"
+	"github.com/opendatav/datav/backend/pkg/i18n"
+	"github.com/opendatav/datav/backend/pkg/models"
+	"github.com/opendatav/datav/backend/pkg/utils/null"
+	"github.com/opendatav/datav/backend/pkg/utils/simplejson"
 	"github.com/gin-gonic/gin"
 )
 
@@ -327,13 +327,13 @@ func GetHistory(c *gin.Context) {
 	var err error
 	switch tp {
 	case "panel":
-		rows, err = db.SQL.Query("SELECT id,dashboard_id,panel_id,state,matches,created FROM alert_history WHERE dashboard_id=? and panel_id=? order by created desc limit ?",
+		rows, err = db.SQL.Query("SELECT id,dashboard_id,panel_id,state,matches,created,alert_name FROM alert_history WHERE dashboard_id=? and panel_id=? order by created desc limit ?",
 			dashId, panelId, limit)
 	case "team":
 		var q string
 		if teamId == 0 {
 			// get all dashboards of all teams
-			q = fmt.Sprintf("SELECT id,dashboard_id,panel_id,state,matches,created FROM alert_history order by created desc limit %d", limit)
+			q = fmt.Sprintf("SELECT id,dashboard_id,panel_id,state,matches,created,alert_name FROM alert_history order by created desc limit %d", limit)
 		} else {
 			// get team dashboards
 			dashboards, err := models.QueryDashboardsByTeamId(teamId)
@@ -354,7 +354,7 @@ func GetHistory(c *gin.Context) {
 			}
 
 			dashIdStr := strings.Join(dashIds, "','")
-			q = fmt.Sprintf("SELECT id,dashboard_id,panel_id,state,matches,created FROM alert_history WHERE dashboard_id in ('%s') order by created desc limit %d",
+			q = fmt.Sprintf("SELECT id,dashboard_id,panel_id,state,matches,created,alert_name FROM alert_history WHERE dashboard_id in ('%s') order by created desc limit %d",
 				dashIdStr, limit)
 		}
 
@@ -379,7 +379,7 @@ func GetHistory(c *gin.Context) {
 		ah := &models.AlertHistory{}
 		var matches []byte
 		var created time.Time
-		err := rows.Scan(&ah.ID, &ah.DashboardID, &ah.PanelID, &ah.State, &matches, &created)
+		err := rows.Scan(&ah.ID, &ah.DashboardID, &ah.PanelID, &ah.State, &matches, &created, &ah.AlertName)
 		if err != nil {
 			logger.Warn("scan alert history error", "error", err)
 			continue
@@ -394,11 +394,11 @@ func GetHistory(c *gin.Context) {
 		ah.Time = created.UnixNano() / 1e6
 		ah.TimeUnix = created.Unix()
 
-		for _, alert := range cache.Alerts {
-			if alert.DashboardId == ah.DashboardID && alert.PanelId == ah.PanelID {
-				ah.AlertName = alert.Name
-			}
-		}
+		// for _, alert := range cache.Alerts {
+		// 	if alert.DashboardId == ah.DashboardID && alert.PanelId == ah.PanelID {
+		// 		ah.AlertName = alert.Name
+
+		// }
 
 		dash, ok := cache.Dashboards[ah.DashboardID]
 		if ok {
@@ -414,6 +414,126 @@ func GetHistory(c *gin.Context) {
 	sort.Sort(histories)
 	c.JSON(200, common.ResponseSuccess(histories))
 	return
+}
+
+type FilterHistoryReq struct {
+	MaxItems  int                  `json:"maxItems"`
+	SortOrder int                  `json:"sortOrder"`
+	Teams     []int64              `json:"teams"`
+	Filter    *FilterHistoryFilter `json:"filter"`
+	From      int64                `json:"from"`
+	To        int64                `json:"to"`
+	DashUID   string               `json:"dahUID"`
+}
+
+type FilterHistoryFilter struct {
+	OK       bool `json:"ok"`
+	Alerting bool `json:"alerting"`
+}
+
+func FilterHistory(c *gin.Context) {
+	req := &FilterHistoryReq{}
+	c.Bind(&req)
+
+	if req.MaxItems <= 0 {
+		req.MaxItems = 10
+	}
+
+	if req.SortOrder != 1 && req.SortOrder != 2 {
+		req.SortOrder = 1
+	}
+
+	dashIDs := make([]int64, 0)
+	// first filter the dashboards by uids
+	uids := strings.Split(req.DashUID, ",")
+	if len(uids) != 0 {
+		for _, uid := range uids {
+			dashID := models.QueryDashIDByUID(uid)
+			if dashID != 0 {
+				dashIDs = append(dashIDs, dashID)
+			}
+		}
+	}
+
+	if len(dashIDs) == 0 {
+		// second filter the dashboard by teamids
+		for _, teamId := range req.Teams {
+			if teamId == 0 {
+				for id := range cache.Dashboards {
+					dashIDs = append(dashIDs, id)
+				}
+			} else {
+				dashes, _ := models.QueryDashboardsByTeamId(teamId)
+				if len(dashes) > 0 {
+					for _, dash := range dashes {
+						dashIDs = append(dashIDs, dash.Id)
+					}
+				}
+			}
+		}
+	}
+
+	// get all alerts history, then sort them by sortOrder
+	histories := make(models.AlertHistories, 0)
+	for _, dashID := range dashIDs {
+		var rows *sql.Rows
+		var err error
+		if req.From != 0 {
+			from := time.Unix(req.From, 0)
+			to := time.Unix(req.To, 0)
+			rows, err = db.SQL.Query("SELECT id,dashboard_id,panel_id,state,created,alert_name FROM alert_history WHERE dashboard_id=? and created >= ? and created <= ? order by created desc limit ?", dashID, from, to, req.MaxItems)
+		} else {
+			rows, err = db.SQL.Query("SELECT id,dashboard_id,panel_id,state,created,alert_name FROM alert_history WHERE dashboard_id=? order by created desc limit ?", dashID, req.MaxItems)
+		}
+
+		if err != nil {
+			if err != sql.ErrNoRows {
+				logger.Warn("query alert history error", "error", err)
+			}
+			continue
+		}
+
+		for rows.Next() {
+			ah := &models.AlertHistory{}
+			var created time.Time
+			err := rows.Scan(&ah.ID, &ah.DashboardID, &ah.PanelID, &ah.State, &created, &ah.AlertName)
+			if err != nil {
+				logger.Warn("scan alert history error", "error", err)
+				continue
+			}
+
+			ah.Time = created.UnixNano() / 1e6
+			ah.TimeUnix = created.Unix()
+
+			alertExist := false
+			for _, alert := range cache.Alerts {
+				if alert.DashboardId == ah.DashboardID && alert.PanelId == ah.PanelID {
+					alertExist = true
+				}
+			}
+
+			if !alertExist {
+				// alert has been removed, but history has not
+				continue
+			}
+
+			dash, ok := cache.Dashboards[ah.DashboardID]
+			if ok {
+				ah.DashboardUrl = fmt.Sprintf("/d/%s/%s", dash.Uid, dash.Slug)
+				ah.TeamId = dash.OwnedBy
+			}
+
+			histories = append(histories, ah)
+		}
+	}
+
+	sort.Sort(histories)
+
+	if req.MaxItems < len(histories) {
+		histories = histories[:req.MaxItems]
+	}
+
+	c.JSON(200, common.ResponseSuccess(histories))
 }
 
 type DashboardAlertRule struct {

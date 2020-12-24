@@ -21,6 +21,13 @@ export const initRoutes = (store: Store<StoreState>) => {
         }
 
         item.component = React.lazy(() => import('src/views/dashboard/DashboardPage'))
+
+        if (!item.id) {
+            item.component = null
+            item.redirectTo = null
+        } else {
+            item.redirectTo = item.url
+        }
     })
 
     const dashboardMenumItems = getBootConfig().sidemenu
@@ -84,19 +91,19 @@ export const initRoutes = (store: Store<StoreState>) => {
             children: [
                 {
                     icon: 'apps',
-                    id: 'datav-fix-menu-create-datasource',
-                    url: '/datasources/new',
-                    title: localeData[currentLang]['common.datasource'], 
-                    exact: true,
-                    component: React.lazy(() => import('src/views/cfg/datasources/NewDataSourcePage')),
-                },
-                {
-                    icon: 'apps',
                     id: 'datav-fix-menu-create-dashboard',
                     url: '/new/dashboard',
                     title: localeData[currentLang]['common.dashboard'], 
                     exact: true,
                     component: React.lazy(() => import('src/views/dashboard/DashboardPage'))
+                },
+                {
+                    icon: 'apps',
+                    id: 'datav-fix-menu-create-datasource',
+                    url: '/datasources/new',
+                    title: localeData[currentLang]['common.datasource'], 
+                    exact: true,
+                    component: React.lazy(() => import('src/views/cfg/datasources/NewDataSourcePage')),
                 },
                 {
                     icon: 'import',

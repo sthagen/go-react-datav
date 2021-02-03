@@ -3,7 +3,7 @@ import React, { PureComponent } from 'react';
 // Components
 
 import { QueryOptions } from './QueryOptions';
-import { Button, CustomScrollbar, HorizontalGroup, Modal, stylesFactory,FormField as Field, config, getTheme } from 'src/packages/datav-core/src';
+import { Button, CustomScrollbar, HorizontalGroup, Modal, stylesFactory,FormField as Field, config, getTheme, currentLang ,localeData} from 'src/packages/datav-core/src';
 import { getLocationSrv } from 'src/packages/datav-core/src';
 import { QueryEditorRows } from './QueryEditorRows';
 
@@ -28,6 +28,8 @@ import { getDatasourceSrv } from 'src/core/services/datasource';
 import { backendSrv } from 'src/core/services/backend';
 import { PluginHelp } from 'src/views/cfg/plugins/PluginHelp';
 import { addQuery } from 'src/core/library/utils/query';
+import { notification } from 'antd';
+
 
 interface Props {
   panel: PanelModel;

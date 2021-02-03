@@ -1,4 +1,5 @@
 import { DashboardModel } from "./DashboardModel";
+import _ from 'lodash'
 import { dashboardMock } from './mocks'
 import { DashboardDTO, ThunkResult, GlobalVariableUid } from "src/types";
 import { getBackendSrv, config, getTemplateSrv, currentLang } from "src/packages/datav-core/src";
@@ -89,6 +90,7 @@ export function initDashboard(uid: string | undefined, initOrigin?: any): ThunkR
 
     annotationsSrv.init(ds);
     initOrigin(ds)
+    
     dispatch(dashboardInitCompleted(ds))
   }
 }
@@ -100,7 +102,7 @@ export function resetDashboardVariables(ds: DashboardModel): ThunkResult<void> {
     try {
       if (config.featureToggles.newVariables) {
         dispatch(initDashboardTemplating(ds.templating.list));
-        await dispatch(processVariables(false));
+        await dispatch(processVariables(true));
         dispatch(completeDashboardTemplating(ds));
       }
     } catch (err) {
@@ -111,6 +113,27 @@ export function resetDashboardVariables(ds: DashboardModel): ThunkResult<void> {
     dispatch(dashboardInitCompleted(ds))
   }
 }
+
+export function setVariablesFromUrl(ds0:any): ThunkResult<void> {
+  return async (dispatch, getState) => {
+    const ds = _.cloneDeep(ds0)
+    // template values service needs to initialize completely before
+    // the rest of the dashboard can load
+    try {
+      if (config.featureToggles.newVariables) {
+        dispatch(initDashboardTemplating(ds.templating.list));
+        await dispatch(processVariables(true));
+        dispatch(completeDashboardTemplating(ds));
+      }
+    } catch (err) {
+      // message.error('Templating init failed')
+      console.log(err);
+    }
+    
+    dispatch(dashboardInitCompleted(ds))
+  }
+}
+
 
 function getNewDashboardModelData(): DashboardDTO {
   const data = {

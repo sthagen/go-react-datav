@@ -48,6 +48,7 @@ const OnRoute = () =>{
           getTimeSrv().init()
           getTimeSrv().setTime(getTimeSrv().time,false)
           appEvents.emit(CoreEvents.timeRangeUpdated)
+          appEvents.emit("update-variables-from-url")
         },100)
       }
   
@@ -55,7 +56,7 @@ const OnRoute = () =>{
         updateLocation({
           path: history.location.pathname,
           query: getUrlParams(),
-          keepUrl: true
+          keepUrl: true,
         })
       )
   

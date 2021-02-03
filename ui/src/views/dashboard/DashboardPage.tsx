@@ -10,12 +10,12 @@ import { getTimeSrv } from 'src/core/services/time'
 import { TimeRange, CustomScrollbar, config, getBackendSrv, currentLang } from 'src/packages/datav-core/src'
 
 import './DashboardPage.less'
-import { initDashboard } from './model/initDashboard';
+import { initDashboard, setVariablesFromUrl} from './model/initDashboard';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
 import { PanelModel } from './model';
 import { PanelEditor } from './components/PanelEditor/PanelEditor'
 import { store, dispatch } from 'src/store/store';
-import { isInDashboardPage, cleanUpDashboard } from 'src/store/reducers/dashboard';
+import { isInDashboardPage, cleanUpDashboard} from 'src/store/reducers/dashboard';
 import { StoreState, CoreEvents, GlobalVariableUid, ViewState } from 'src/types'
 import { connect } from 'react-redux';
 import appEvents from 'src/core/library/utils/app_events';
@@ -31,7 +31,7 @@ import impressionSrv from 'src/core/services/impression'
 
 import { onTimeRangeUpdated } from '../variables/state/actions';
 import HeaderWrapper from './components/Header/Header'
-import { updateUrl } from 'src/core/library/utils/url';
+import { addParamsToUrl, addParamToUrl, updateUrl } from 'src/core/library/utils/url';
 import { getVariables } from 'src/views/variables/state/selectors'
 import { saveDashboard } from './components/SaveDashboard/SaveDashboard';
 import { formatDocumentTitle } from 'src/core/library/utils/date';
@@ -47,6 +47,7 @@ interface DashboardPageProps {
     inspectPanelId?: string | null
     inspectTab?: InspectTab
     initDashboard: typeof initDashboard
+    setVariablesFromUrl: typeof setVariablesFromUrl
     initErrorStatus: number
     viewState: ViewState
 }
@@ -102,14 +103,26 @@ class DashboardPage extends React.PureComponent<DashboardPageProps & RouteCompon
         this.saveDashboard = this.saveDashboard.bind(this)
         this.onUpdateUrl = this.onUpdateUrl.bind(this)
         this.handleAutoSave = this.handleAutoSave.bind(this)
+        this.updateVariablesFromUrl = this.updateVariablesFromUrl.bind(this)
 
         appEvents.on(CoreEvents.keybindingSaveDashboard, this.saveDashboard)
 
         appEvents.on(CoreEvents.dashboardSaved, this.setOriginDash);
 
         appEvents.on('dashboard-auto-save', this.handleAutoSave)
+
+        appEvents.on('update-variables-from-url',this.updateVariablesFromUrl)
         // because appEvents.off has no effect , so we introduce a state
         store.dispatch(isInDashboardPage(true))
+    }
+
+    updateVariablesFromUrl() {
+        if (this.originDash) {
+            const d = this.props.dashboard.getSaveModelClone()
+            const ds = new DashboardModel(d)
+            ds.meta = _.cloneDeep(this.props.dashboard.meta)
+            setTimeout(() => {this.props.setVariablesFromUrl(ds)}, 500)
+        }
     }
 
     // when dashboard init or saved, we need to handle auto save for this dashboard
@@ -155,9 +168,12 @@ class DashboardPage extends React.PureComponent<DashboardPageProps & RouteCompon
         }
  
         document.title = formatDocumentTitle(ds.title)
+
+        this.onUpdateUrl()
     }
 
     componentWillUnmount() {
+        this.originDash = null
         // unregister from changeTracker
         tracker.unregister()
 
@@ -233,6 +249,10 @@ class DashboardPage extends React.PureComponent<DashboardPageProps & RouteCompon
 
 
     hasChanges() {
+        if (!this.props.dashboard.meta.canSave) {
+            return false
+        }
+        
         const current = cleanDashboardFromIgnoredChanges(this.props.dashboard.getSaveModelClone());
         const original = cleanDashboardFromIgnoredChanges(this.originDash);
 
@@ -287,23 +307,17 @@ class DashboardPage extends React.PureComponent<DashboardPageProps & RouteCompon
     onUpdateUrl() {
         const timeSrv = getTimeSrv()
         const urlRange = timeSrv.timeRangeForUrl();
-        // const currentQuery = getUrlParams()
-        // _.extend(currentQuery, urlRange)
-        const times = queryString.stringify(urlRange)
 
         const variables = getVariables()
-        let vars = ""
+
         variables.forEach((variable: any) => {
-            if (variable.multi) {
-                variable.current.value.forEach((v) => {
-                    vars = vars + '&var-' + variable.name + '=' + v
-                })
-            } else {
-                vars = vars + '&var-' + variable.name + '=' + variable.current.value
+            const display =this.originDash.variablesDiplay.indexOf(variable.name) === -1 
+            if (display) {
+                urlRange['var-'+variable.name] = variable.current.value
             }
         })
 
-        updateUrl(times + vars)
+        store.dispatch(updateLocation({query: urlRange,partial: true}))
     }
 
     getPanelByIdFromUrlParam(rawPanelId: string): PanelModel {
@@ -466,6 +480,7 @@ export const mapStateToProps = (state: StoreState) => {
 
 const mapDispatchToProps = {
     initDashboard,
+    setVariablesFromUrl
 };
 
 export default withRouter(connect(mapStateToProps, mapDispatchToProps)(DashboardPage))

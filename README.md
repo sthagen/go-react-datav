@@ -1,5 +1,5 @@
 # Datav
-The open-source platform for data monitoring and observability. 
+The open-source platform for data visualization and observability. 
 
 Datav is forked from **@grafana**, but changed a lot, e.g :
 - remove angular dependency, using pure react
@@ -8,14 +8,6 @@ Datav is forked from **@grafana**, but changed a lot, e.g :
 - large screen supported
 - different team and acl design,no orgs any more 
 - 100% free. Forever and always
-
-## TODO list for V1.0.0
-1. English docs
-2. Some bug fixes
-3. Website and a live demo
-
-The release will be launched before 2021-02-31
-
 
 ## Key Features 
 - **Plugins** Performance,Extensible,Beautiful,Configurable
@@ -30,7 +22,7 @@ The release will be launched before 2021-02-31
 ## How to start(developing mode)
 ### Start datav main server
 ```bash
-> git clone https://github.com/opendatav/datav
+> git clone https://github.com/datav-io/datav
 > cd datav
 > go build
 > ./datav generate ##only needed for first time or new plugins been added
@@ -54,6 +46,11 @@ Access http://localhost:3000/docs-cn/installation to see the results
 ```
 
 Open http://localhost:3001, then login with admin/admin
+
+## Visitors Count
+
+<img align="left" src = "https://profile-counter.glitch.me/datav/count.svg" alt ="Loading">
+
 
 ## Screenshots
 ![screenshot1](ui/public/img/screenshot1.jpg)

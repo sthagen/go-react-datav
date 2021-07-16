@@ -3,7 +3,7 @@ package alerting
 import (
 	"time"
 
-	"github.com/opendatav/datav/backend/pkg/models"
+	"github.com/datav-io/datav/backend/pkg/models"
 )
 
 type evalHandler interface {
@@ -27,7 +27,7 @@ func (e *DefaultEvalHandler) Eval(context *models.EvalContext) {
 	metrics := make(map[string]*models.EvalMatch)
 	for i := 0; i < len(context.Rule.Conditions); i++ {
 		condition := context.Rule.Conditions[i]
-		//@todo: 这里每个条件都会执行一次查询语句，效率过于低下
+		//@todo: combine queries to lift efficiency
 		cr, err := condition.Eval(context)
 		if err != nil {
 			context.Error = err
